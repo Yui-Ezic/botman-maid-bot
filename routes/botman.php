@@ -1,7 +1,9 @@
 <?php
 use App\Http\Controllers\BotManController;
 use App\Http\Middleware\Botman\ProfanityFilter;
+use BotMan\BotMan\BotMan;
 
+/**@var $botman BotMan*/
 $botman = resolve('botman');
 
 $botman->middleware->received(app(ProfanityFilter::class));
