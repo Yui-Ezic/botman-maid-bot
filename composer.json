@@ -18,8 +18,10 @@
         "fideloper/proxy": "^4.0",
         "laravel/framework": "5.7.*",
         "laravel/tinker": "^1.0",
+        "mikehaertl/phpwkhtmltopdf": "^2.4",
         "snipe/banbuilder": "dev-master",
-        "yageorgiy/botman-vk-community-callback-driver": "^1.4"
+        "yageorgiy/botman-vk-community-callback-driver": "^1.4",
+        "ext-imagick": "*"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
