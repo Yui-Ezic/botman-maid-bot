@@ -9,13 +9,24 @@ use Snipe\BanBuilder\CensorWords;
 class BanBuilder implements ProfanityFilter
 {
     /**
+     * @var CensorWords
+     */
+    protected $censor;
+
+    /**
+     * BanBuilder constructor.
+     * @param CensorWords $censor
+     */
+    public function __construct(CensorWords $censor)
+    {
+        $this->censor = $censor;
+    }
+
+    /**
      * @inheritDoc
      */
     public function badWords(string $text): array
     {
-        $censor = new CensorWords;
-        $censor->setDictionary(config('banbuilder.dictionaries.rus.blacklist'));
-        $censor->addWhiteList(config('banbuilder.dictionaries.rus.whitelist'));
-        return $censor->censorString(mb_strtolower($text))['matched'];
+        return $this->censor->censorString(mb_strtolower($text))['matched'];
     }
 }
