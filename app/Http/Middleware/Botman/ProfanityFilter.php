@@ -4,8 +4,7 @@
 namespace App\Http\Middleware\Botman;
 
 
-use App\Events\ProfanityFound;
-use App\Services\ProfanityFilter\ProfanityFilter as ProfanityFilterService;
+use App\Jobs\CheckMessageForProfanity;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\Interfaces\Middleware\Received;
 use BotMan\BotMan\Messages\Incoming\IncomingMessage;
@@ -13,16 +12,8 @@ use BotMan\BotMan\Messages\Incoming\IncomingMessage;
 class ProfanityFilter implements Received
 {
     /**
-     * @var ProfanityFilterService
-     */
-    private $filter;
-
-    public function __construct(ProfanityFilterService $filter)
-    {
-        $this->filter = $filter;
-    }
-
-    /**
+     * Dispatches job which check message for profanity to the queue
+     *
      * @param IncomingMessage $message
      * @param callable $next
      * @param BotMan $bot
@@ -30,10 +21,7 @@ class ProfanityFilter implements Received
      */
     public function received(IncomingMessage $message, $next, BotMan $bot)
     {
-        $badWords = $this->filter->badWords($message->getText());
-        if (!empty($badWords)) {
-            event(new ProfanityFound($badWords, $bot, $message));
-        }
+        CheckMessageForProfanity::dispatch($bot->getDriver());
 
         return $next($message);
     }
