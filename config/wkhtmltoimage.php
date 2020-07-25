@@ -19,7 +19,7 @@ return [
     | Set screen width, note that this is used only as a guide line. Use --disable-smart-width to make it strict.
     |
     */
-    'width' => 0,
+    'width' => env("WK_HTML_TO_IMAGE_WIDTH", 0),
 
     /*
     |--------------------------------------------------------------------------
@@ -29,7 +29,7 @@ return [
     | Wait some milliseconds for javascript finish
     |
     */
-    'javascript-delay' => 700,
+    'javascript-delay' => env("WK_HTML_TO_IMAGE_JAVASCRIPT_DELAY", 700),
 
     /*
     |--------------------------------------------------------------------------
@@ -89,7 +89,7 @@ return [
     | Ignore warnings
     |
     */
-    'ignoreWarnings' => true,
+    'ignoreWarnings' => env("WK_HTML_TO_IMAGE_IGNORE_WARNINGS", true),
 
     /*
     |--------------------------------------------------------------------------
