@@ -61,7 +61,7 @@ class QuoteService
         }
 
         // Remove edges and save
-        $name = uniqid("vk/$fromId/quote-", true);
+        $name = uniqid("vk/$fromId/quote-", true) . '.png';
         $this->filesystem->put("public/$name", $this->trimImage($content));
 
         return asset("storage/$name");
