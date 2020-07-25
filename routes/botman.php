@@ -8,7 +8,11 @@ $botman = resolve('botman');
 
 $botman->middleware->received(app(ProfanityFilter::class));
 
-$botman->hears('Hi', function ($bot) {
+$botman->hears('Hi', static function (BotMan $bot) {
     $bot->reply('Hello!');
 });
 $botman->hears('Start conversation', BotManController::class.'@startConversation');
+
+$botman->on("confirmation", static function(){
+    echo config('botman.vk.confirmation_string');
+});

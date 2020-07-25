@@ -50,7 +50,8 @@ return [
     | Should be copied from the Callback API tab.
     |
     */
-    "confirm" => env("VK_CONFIRM"),
+    "confirm" => '', # DEPRECATED SINCE v.1.4.2, LEAVE BLANK (EMPTY STRING)
+    "confirmation_string" => env("VK_CONFIRM"),
 
     /*
     |--------------------------------------------------------------------------
