@@ -29,6 +29,7 @@
             border-radius: 10px;
             max-width: 500px;
             display: table;
+            word-break: break-word;
         }
 
         .message-text {
