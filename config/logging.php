@@ -35,7 +35,8 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single', 'daily'],
+            'channels' => ['daily', 'sentry'],
+            'name' => env('LOG_CHANNEL_NAME', env('APP_NAME', null))
         ],
 
         'single' => [
@@ -47,7 +48,7 @@ return [
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
-            'level' => 'debug',
+            'level' => env('DAILY_LOGGING_LEVEL', 'debug'),
             'days' => 7,
         ],
 
@@ -76,6 +77,12 @@ return [
             'driver' => 'errorlog',
             'level' => 'debug',
         ],
+
+        'sentry' => [
+            'driver' => 'sentry',
+            'level' => env('SENTRY_LOGGING_LEVEL', null),
+            'bubble' => true, // Whether the messages that are handled can bubble up the stack or not
+        ]
     ],
 
 ];
