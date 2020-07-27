@@ -23,7 +23,8 @@
         "predis/predis": "^1.1",
         "sentry/sentry-laravel": "^1.8",
         "snipe/banbuilder": "dev-master",
-        "yageorgiy/botman-vk-community-callback-driver": "^1.4"
+        "yageorgiy/botman-vk-community-callback-driver": "^1.4",
+        "ext-json": "*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.7",
