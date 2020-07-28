@@ -59,7 +59,7 @@
     <img src="{{ $avatar }}" alt="Avatar">
     <div class="message">
         <span class="message-author">{{ $author }}</span>
-        <p class="message-text">{{ $text }}</p>
+        <p class="message-text">{!! nl2br(e($text)) !!}</p>
     </div>
 </div>
 </body>
