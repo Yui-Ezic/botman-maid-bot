@@ -33,7 +33,7 @@ class VkUsersService implements UsersService
         $user = $this->botMan->sendRequest('users.get', [
             'user_ids' => $id,
             'fields' => 'photo_100'
-        ]);
+        ])['response'][0];
 
         return [
             'first_name' => $user['first_name'],
