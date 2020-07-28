@@ -62,6 +62,16 @@ class QuotesController extends Controller
                 return;
             }
 
+            if ($messageForQuote->getAuthorId() <= 0) {
+                $bot->reply('Прошу прощения, но злой вк не позволяет мне сделать цитату из сообщения сообщества 😢.');
+                return;
+            }
+
+            if (!$messageForQuote->getText()) {
+                $bot->reply('Простите, но я не могу сделать цитату с пустым сообщением 🙅‍.');
+                return;
+            }
+
             $image = new Image($this->quoteService->createForVk($messageForQuote->getAuthorId(), $messageForQuote->getText()));
 
             $user = $this->usersService->getUser($message->getAuthorId());
