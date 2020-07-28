@@ -20,4 +20,15 @@ class FakeVkUsersService implements UsersService
             'photo' => 'https://sun9-15.userapi.com/c857036/v857036068/16132b/8-aPD9XHfto.jpg?ava=1'
         ];
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getUser(int $id): array
+    {
+        return [
+            'first_name' => 'Yui',
+            'last_name' => 'Ezic',
+        ];
+    }
 }
