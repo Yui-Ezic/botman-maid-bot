@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
-use App\Services\Bot\UsersService;
-use App\Services\Bot\Vk\FakeVkUsersService;
+use App\Http\Controllers\BotMan\Vk\QuotesController;
+use App\Services\Bot\Vk\VkUsersService;
+use App\UseCases\Bot\QuoteService;
+use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,7 +26,19 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
+        $this->app->singleton(VkUsersService::class, static function (Application $app) {
+            return new VkUsersService($app->make('botman'));
+        });
+
+        $this->app->when(QuotesController::class)
+            ->needs(QuoteService::class)
+            ->give(static function(Application $app) {
+                return new QuoteService(
+                    $app->make(VkUsersService::class),
+                    $app->make(Filesystem::class)
+                );
+            });
     }
 }
