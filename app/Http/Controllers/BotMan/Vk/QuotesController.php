@@ -7,6 +7,8 @@ namespace App\Http\Controllers\BotMan\Vk;
 use App\Http\Controllers\Controller;
 use App\Services\Bot\Vk\MessageCreator;
 use App\Services\Bot\Vk\VkUsersService;
+use App\Services\Messages\LaravelMessageService;
+use App\Services\Messages\MessageService;
 use App\UseCases\Bot\QuoteService;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\Messages\Attachments\Image;
@@ -27,15 +29,22 @@ class QuotesController extends Controller
     private $usersService;
 
     /**
+     * @var LaravelMessageService
+     */
+    private $messageService;
+
+    /**
      * QuotesController constructor.
      *
      * @param QuoteService $quoteService
      * @param VkUsersService $usersService
+     * @param MessageService $messageService
      */
-    public function __construct(QuoteService $quoteService, VkUsersService $usersService)
+    public function __construct(QuoteService $quoteService, VkUsersService $usersService, MessageService $messageService)
     {
         $this->quoteService = $quoteService;
         $this->usersService = $usersService;
+        $this->messageService = $messageService;
     }
 
     /**
@@ -58,17 +67,17 @@ class QuotesController extends Controller
             } elseif ($message->hasForwardedMessages()) {
                 $messageForQuote = $message->getForwardedMessages()[0];
             } else {
-                $bot->reply('Для создания цитаты используйте команду /q в ответ или вместе с пересланным сообщением.');
+                $bot->reply($this->messageService->getMessage('quotes.help'));
                 return;
             }
 
             if ($messageForQuote->getAuthorId() <= 0) {
-                $bot->reply('Прошу прощения, но злой вк не позволяет мне сделать цитату из сообщения сообщества 😢.');
+                $bot->reply($this->messageService->getMessage('quotes.groups_not_allowed'));
                 return;
             }
 
             if (!$messageForQuote->getText()) {
-                $bot->reply('Простите, но я не могу сделать цитату с пустым сообщением 🙅‍.');
+                $bot->reply($this->messageService->getMessage('empty_message_not_allowed'));
                 return;
             }
 
@@ -76,12 +85,14 @@ class QuotesController extends Controller
 
             $user = $this->usersService->getUser($message->getAuthorId());
         } catch (Throwable $e) {
-            $bot->reply('При создании цитаты произошла ошибка. Разработчики уже побежали ее исправлять 🏃‍');
+            $bot->reply($this->messageService->getMessage('quotes.unknown_error'));
             throw $e;
         }
 
-        $message = OutgoingMessage::create('*id' . $user['id'] . ' (' . $user['first_name'] . '), цитата готова ✅.')
-            ->withAttachment($image);
+        $message = OutgoingMessage::create($this->messageService->getMessage('quotes.done', [
+            'user_id' => $user['id'],
+            'user_name' => $user['first_name']
+        ]))->withAttachment($image);
         $bot->reply($message);
     }
 }
