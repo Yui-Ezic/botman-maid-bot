@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Http\Controllers\BotMan\Vk\QuotesController;
 use App\Services\Bot\Vk\VkUsersService;
+use App\Services\Messages\LaravelMessageService;
+use App\Services\Messages\MessageService;
 use App\UseCases\Bot\QuoteService;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
@@ -40,5 +42,9 @@ class AppServiceProvider extends ServiceProvider
                     $app->make(Filesystem::class)
                 );
             });
+
+        $this->app->singleton(MessageService::class, static function() {
+            return new LaravelMessageService(null);
+        });
     }
 }
