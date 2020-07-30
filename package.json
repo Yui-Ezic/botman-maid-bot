@@ -24,6 +24,7 @@
     "vue-template-compiler": "^2.6.11"
   },
   "dependencies": {
-    "botman-tinker": "^0.0.1"
+    "botman-tinker": "^0.0.1",
+    "twemoji": "^13.0.1"
   }
 }
