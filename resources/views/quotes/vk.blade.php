@@ -42,7 +42,7 @@
         }
 
         /* Style images */
-        .container img {
+        .avatar {
             align-self: flex-start;
             float: left;
             max-width: 50px;
@@ -50,17 +50,28 @@
             margin-right: 5px;
             border-radius: 50%;
         }
+
+        img.emoji {
+            height: 1em;
+            width: 1em;
+            margin: 0 .05em 0 .1em;
+            vertical-align: -0.1em;
+        }
     </style>
 
+    <script src="{{ asset('/build/js/twemoji.min.js') }}" crossorigin="anonymous"></script>
 </head>
 
 <body>
 <div class="container">
-    <img src="{{ $avatar }}" alt="Avatar">
+    <img class="avatar" src="{{ $avatar }}" alt="Avatar">
     <div class="message">
         <span class="message-author">{{ $author }}</span>
         <p class="message-text">{!! nl2br(e($text)) !!}</p>
     </div>
 </div>
+<script>
+    twemoji.parse(document.body);
+</script>
 </body>
 </html>
