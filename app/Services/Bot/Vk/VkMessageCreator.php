@@ -5,9 +5,10 @@ namespace App\Services\Bot\Vk;
 
 
 use App\Entities\Bot\Messages\Message;
+use App\Services\Bot\MessageCreator;
 use InvalidArgumentException;
 
-class MessageCreator
+class VkMessageCreator implements MessageCreator
 {
     /**
      * Creates Message object from json.
@@ -63,5 +64,13 @@ class MessageCreator
     private function getFromArray(array &$source, $key, $default)
     {
         return array_key_exists($key, $source) ? $source[$key] : $default;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function create(array $messagePayload): Message
+    {
+        return $this->createFromJson($messagePayload);
     }
 }

@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
-use App\Http\Controllers\BotMan\Vk\QuotesController;
+use App\Services\Bot\MessageCreator;
+use App\Services\Bot\UsersService;
+use App\Services\Bot\Vk\VkMessageCreator;
 use App\Services\Bot\Vk\VkUsersService;
 use App\Services\Messages\LaravelMessageService;
 use App\Services\Messages\MessageService;
 use App\UseCases\Bot\QuoteService;
+use DomainException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
@@ -34,11 +37,42 @@ class AppServiceProvider extends ServiceProvider
             return new VkUsersService($app->make('botman'));
         });
 
-        $this->app->when(QuotesController::class)
-            ->needs(QuoteService::class)
-            ->give(static function(Application $app) {
+        $this->app->bind(UsersService::class, static function(Application $app) {
+            $botman = $app->make('botman');
+            switch ($botman->getDriver()->getName())
+            {
+                case 'VkCommunityCallback':
+                    return $app->make(VkUsersService::class);
+                    break;
+                default:
+                    throw new DomainException('Unsupported driver: ' . $botman->getDriver()->getName());
+            }
+        });
+
+        $this->app->bind(MessageCreator::class, static function (Application $app) {
+            $botman = $app->make('botman');
+            switch ($botman->getDriver()->getName())
+            {
+                case 'VkCommunityCallback':
+                    return $app->make(VkMessageCreator::class);
+                    break;
+                default:
+                    throw new DomainException('Unsupported driver: ' . $botman->getDriver()->getName());
+            }
+        });
+
+        $this->app->bind(QuoteService::class, static function(Application $app) {
+                $botman = $app->make('botman');
+                switch ($botman->getDriver()->getName())
+                {
+                    case 'VkCommunityCallback':
+                        $userService = $app->make(VkUsersService::class);
+                        break;
+                    default:
+                        throw new DomainException('Unsupported driver: ' . $botman->getDriver()->getName());
+                }
                 return new QuoteService(
-                    $app->make(VkUsersService::class),
+                    $userService,
                     $app->make(Filesystem::class)
                 );
             });

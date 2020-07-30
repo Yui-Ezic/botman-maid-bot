@@ -1,33 +1,24 @@
 <?php
 
 
-namespace App\Http\Controllers\BotMan\Vk;
+namespace App\Http\Controllers\BotMan;
 
 
 use App\Http\Controllers\Controller;
-use App\Services\Bot\Vk\MessageCreator;
-use App\Services\Bot\Vk\VkUsersService;
+use App\Services\Bot\MessageCreator;
+use App\Services\Bot\UsersService;
 use App\Services\Messages\LaravelMessageService;
 use App\Services\Messages\MessageService;
 use App\UseCases\Bot\QuoteService;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\Messages\Attachments\Image;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
+use DomainException;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Throwable;
 
 class QuotesController extends Controller
 {
-    /**
-     * @var QuoteService
-     */
-    private $quoteService;
-
-    /**
-     * @var VkUsersService
-     */
-    private $usersService;
-
     /**
      * @var LaravelMessageService
      */
@@ -36,19 +27,15 @@ class QuotesController extends Controller
     /**
      * QuotesController constructor.
      *
-     * @param QuoteService $quoteService
-     * @param VkUsersService $usersService
      * @param MessageService $messageService
      */
-    public function __construct(QuoteService $quoteService, VkUsersService $usersService, MessageService $messageService)
+    public function __construct(MessageService $messageService)
     {
-        $this->quoteService = $quoteService;
-        $this->usersService = $usersService;
         $this->messageService = $messageService;
     }
 
     /**
-     * Creates image with quote. Only for vk!
+     * Creates image with quote
      *
      * @param BotMan $bot
      *
@@ -57,7 +44,13 @@ class QuotesController extends Controller
     public function createQuote(BotMan $bot): void
     {
         try {
+            /**
+             * Resolve dependencies
+             */
+            $usersService = app(UsersService::class);
+            $quoteService = app(QuoteService::class);
             $messagesCreator = app(MessageCreator::class);
+
             /** @var ParameterBag $payload */
             $payload = $bot->getMessage()->getPayload();
             $message = $messagesCreator->createFromJson($payload->get('object')['message']);
@@ -81,9 +74,12 @@ class QuotesController extends Controller
                 return;
             }
 
-            $image = new Image($this->quoteService->createForVk($messageForQuote->getAuthorId(), $messageForQuote->getText()));
+            $image = new Image($quoteService->createForVk($messageForQuote->getAuthorId(), $messageForQuote->getText()));
 
-            $user = $this->usersService->getUser($message->getAuthorId());
+            $user = $usersService->getUser($message->getAuthorId());
+        } catch (DomainException $e) {
+            $bot->reply($e->getMessage());
+            return;
         } catch (Throwable $e) {
             $bot->reply($this->messageService->getMessage('quotes.unknown_error'));
             throw $e;

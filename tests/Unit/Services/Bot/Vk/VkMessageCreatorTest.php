@@ -5,17 +5,17 @@ namespace Services\Bot\Vk;
 
 
 use App\Entities\Bot\Messages\Message;
-use App\Services\Bot\Vk\MessageCreator;
+use App\Services\Bot\Vk\VkMessageCreator;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class MessageCreatorTest extends TestCase
+class VkMessageCreatorTest extends TestCase
 {
     use WithFaker;
 
     public function testResolveSimpleMessage(): void
     {
-        $resolver = new MessageCreator();
+        $resolver = new VkMessageCreator();
 
         $messagePayload = $this->generateSimpleMessagePayload();
 
@@ -55,7 +55,7 @@ class MessageCreatorTest extends TestCase
 
     public function testResolveMessageWithReply(): void
     {
-        $resolver = new MessageCreator();
+        $resolver = new VkMessageCreator();
 
         $replyMessage = $this->generateSimpleMessagePayload();
 
@@ -77,7 +77,7 @@ class MessageCreatorTest extends TestCase
 
     public function testResolveMessageWithForwardedMessage(): void
     {
-        $resolver = new MessageCreator();
+        $resolver = new VkMessageCreator();
 
         $forwardedMessage = $this->generateSimpleMessagePayload();
 
@@ -100,7 +100,7 @@ class MessageCreatorTest extends TestCase
 
     public function testForwardedMessageInsideReply(): void
     {
-        $resolver = new MessageCreator();
+        $resolver = new VkMessageCreator();
 
         $forwardedMessage = $this->generateSimpleMessagePayload();
         $replyMessage = $this->generateSimpleMessagePayload();
