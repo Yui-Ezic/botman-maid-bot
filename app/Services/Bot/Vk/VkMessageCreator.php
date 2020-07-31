@@ -5,6 +5,7 @@ namespace App\Services\Bot\Vk;
 
 
 use App\Entities\Bot\Messages\Message;
+use App\Entities\Bot\Messages\VkMessage;
 use App\Services\Bot\MessageCreator;
 use InvalidArgumentException;
 
@@ -30,7 +31,7 @@ class VkMessageCreator implements MessageCreator
         $forwardedMessages = array_map(function ($item) {
             return $this->createFromJson($item);
         }, $this->getFromArray($vkMessage, 'fwd_messages', []));
-        return new Message($fromId, $text, $replyMessage, $forwardedMessages);
+        return new VkMessage($fromId, $text, $replyMessage, $forwardedMessages);
     }
 
     /**

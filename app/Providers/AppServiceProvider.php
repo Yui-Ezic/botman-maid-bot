@@ -6,8 +6,10 @@ use App\Services\Bot\MessageCreator;
 use App\Services\Bot\UsersService;
 use App\Services\Bot\Vk\VkMessageCreator;
 use App\Services\Bot\Vk\VkUsersService;
+use App\Services\Images\ImagickTrimmer;
 use App\Services\Messages\LaravelMessageService;
 use App\Services\Messages\MessageService;
+use App\Services\Quotes\QuotesMaker;
 use App\UseCases\Bot\QuoteService;
 use DomainException;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -73,7 +75,9 @@ class AppServiceProvider extends ServiceProvider
                 }
                 return new QuoteService(
                     $userService,
-                    $app->make(Filesystem::class)
+                    $app->make(Filesystem::class),
+                    $app->make(ImagickTrimmer::class),
+                    $app->make(QuotesMaker::class)
                 );
             });
 

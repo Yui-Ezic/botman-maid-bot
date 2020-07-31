@@ -4,12 +4,12 @@
 namespace App\UseCases\Bot;
 
 
+use App\Entities\Bot\Messages\Message;
 use App\Services\Bot\UsersService;
-use App\UseCases\Bot\Exception\ConvertHtmlToImageException;
+use App\Services\Images\ImagickTrimmer;
+use App\Services\Quotes\QuotesMaker;
 use Illuminate\Contracts\Filesystem\Filesystem;
-use Imagick;
 use ImagickException;
-use mikehaertl\wkhtmlto\Image;
 use Throwable;
 
 class QuoteService
@@ -25,66 +25,54 @@ class QuoteService
     private $filesystem;
 
     /**
+     * @var ImagickTrimmer
+     */
+    private $imageTrimmer;
+
+    /**
+     * @var QuotesMaker
+     */
+    private $quotesMaker;
+
+    /**
      * QuoteService constructor.
      * @param UsersService $usersService
      * @param Filesystem $filesystem
+     * @param ImagickTrimmer $imageTrimmer
+     * @param QuotesMaker $quotesMaker
      */
-    public function __construct(UsersService $usersService, Filesystem $filesystem)
+    public function __construct(UsersService $usersService,
+                                Filesystem $filesystem,
+                                ImagickTrimmer $imageTrimmer,
+                                QuotesMaker $quotesMaker)
     {
         $this->usersService = $usersService;
         $this->filesystem = $filesystem;
+        $this->imageTrimmer = $imageTrimmer;
+        $this->quotesMaker = $quotesMaker;
     }
 
     /**
      * Creates an image with quote for vk message.
-     * @param int $fromId unique identifier of vk user
-     * @param string $text quote text
+     * @param Message $message incoming message
      * @return string image url
-     * @throws Throwable
      * @throws ImagickException
-     * @throws ConvertHtmlToImageException
+     * @throws Throwable
      */
-    public function createForVk(int $fromId, string $text): string
+    public function createForVk(Message $message): string
     {
+        $authorId = $message->getAuthorId();
+
         // Get author info
-        $author = $this->usersService->getUserWithPhoto100px($fromId);
+        $author = $this->usersService->getUserWithPhoto100px($authorId);
 
         // Convert Html to Image
-        $image = app(Image::class);
-        $image->setPage(view('quotes.vk', [
-            'text' => $text,
-            'author' => $author['first_name'] . ($author['last_name'] ? ' ' . $author['last_name'] : ''),
-            'avatar' => $author['photo']
-        ])->render());
-        if (($content = $image->toString()) === false) {
-            throw new ConvertHtmlToImageException($image->getError());
-        }
+        $content = $this->quotesMaker->make($message->getText(), $author, 'quotes.vk');
 
         // Remove edges and save
-        $name = uniqid("vk/$fromId/quote-", true) . '.png';
-        $this->filesystem->put("public/$name", $this->trimImage($content));
+        $name = uniqid("vk/$authorId/quote-", true) . '.png';
+        $this->filesystem->put("public/$name", $this->imageTrimmer->trimImage($content));
 
         return asset("storage/$name");
-    }
-
-    /**
-     * Remove edges from the image
-     * @param string $image
-     * @return Imagick
-     * @throws ImagickException
-     */
-    private function trimImage(string $image): Imagick
-    {
-        $imagick = new Imagick();
-
-        if (!$imagick->readImageBlob($image)) {
-            throw new ImagickException('Cannot read quote image blob.');
-        }
-
-        if (!$imagick->trimImage(0)) {
-            throw new ImagickException('Cannot trim quote image.');
-        }
-
-        return $imagick;
     }
 }

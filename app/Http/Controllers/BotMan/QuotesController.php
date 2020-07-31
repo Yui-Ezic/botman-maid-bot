@@ -4,6 +4,8 @@
 namespace App\Http\Controllers\BotMan;
 
 
+use App\Entities\Bot\Messages\Message;
+use App\Exceptions\Quotes\CannotRetrieveMessageForQuote;
 use App\Http\Controllers\Controller;
 use App\Services\Bot\MessageCreator;
 use App\Services\Bot\UsersService;
@@ -55,17 +57,10 @@ class QuotesController extends Controller
             $payload = $bot->getMessage()->getPayload();
             $message = $messagesCreator->createFromJson($payload->get('object')['message']);
 
-            if ($message->hasReplyTo()) {
-                $messageForQuote = $message->getReplyTo();
-            } elseif ($message->hasForwardedMessages()) {
-                $messageForQuote = $message->getForwardedMessages()[0];
-            } else {
-                $bot->reply($this->messageService->getMessage('quotes.help'));
-                return;
-            }
+            $messageForQuote = $this->getMessageForQuote($message);
 
-            if ($messageForQuote->getAuthorId() <= 0) {
-                $bot->reply($this->messageService->getMessage('quotes.groups_not_allowed'));
+            if (!$messageForQuote->isAuthorInfoCanBeRetrieved()) {
+                $bot->reply($this->messageService->getMessage('quotes.author_not_allowed'));
                 return;
             }
 
@@ -74,21 +69,45 @@ class QuotesController extends Controller
                 return;
             }
 
-            $image = new Image($quoteService->createForVk($messageForQuote->getAuthorId(), $messageForQuote->getText()));
+            $image = new Image($quoteService->createForVk($messageForQuote));
 
             $user = $usersService->getUser($message->getAuthorId());
+
+            $message = OutgoingMessage::create($this->messageService->getMessage('quotes.done', [
+                'user_id' => $user['id'],
+                'user_name' => $user['first_name']
+            ]))->withAttachment($image);
+
+            $bot->reply($message);
+        } catch (CannotRetrieveMessageForQuote $e) {
+            $bot->reply($this->messageService->getMessage('quotes.help'));
         } catch (DomainException $e) {
             $bot->reply($e->getMessage());
-            return;
         } catch (Throwable $e) {
             $bot->reply($this->messageService->getMessage('quotes.unknown_error'));
             throw $e;
         }
+    }
 
-        $message = OutgoingMessage::create($this->messageService->getMessage('quotes.done', [
-            'user_id' => $user['id'],
-            'user_name' => $user['first_name']
-        ]))->withAttachment($image);
-        $bot->reply($message);
+    /**
+     * Retrieves a message for a quote
+     *
+     * @param Message $message incoming message
+     *
+     * @return Message
+     *
+     * @throws CannotRetrieveMessageForQuote
+     */
+    private function getMessageForQuote(Message $message): Message
+    {
+        if ($message->hasReplyTo()) {
+            return $message->getReplyTo();
+        }
+
+        if ($message->hasForwardedMessages()) {
+            return $message->getForwardedMessages()[0];
+        }
+
+        throw new CannotRetrieveMessageForQuote('To create a quote, the message must contain a reply or forwarded message(s).');
     }
 }

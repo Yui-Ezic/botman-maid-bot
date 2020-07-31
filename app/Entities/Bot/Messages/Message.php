@@ -4,7 +4,7 @@
 namespace App\Entities\Bot\Messages;
 
 
-class Message
+abstract class Message
 {
     /**
      * @var int
@@ -83,4 +83,11 @@ class Message
     {
         return $this->replyTo !== null;
     }
+
+    /**
+     * Returns false for authors whose information cannot be retrieved
+     *
+     * @return bool
+     */
+    abstract public function isAuthorInfoCanBeRetrieved(): bool;
 }
