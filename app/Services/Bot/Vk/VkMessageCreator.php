@@ -6,6 +6,7 @@ namespace App\Services\Bot\Vk;
 
 use App\Entities\Bot\Messages\Message;
 use App\Entities\Bot\Messages\VkMessage;
+use App\Entities\Bot\Photo;
 use App\Services\Bot\MessageCreator;
 use InvalidArgumentException;
 
@@ -28,10 +29,11 @@ class VkMessageCreator implements MessageCreator
         if ($replyMessage !== null) {
             $replyMessage = $this->createFromJson($replyMessage);
         }
+        $photos = $this->getPhotos($vkMessage);
         $forwardedMessages = array_map(function ($item) {
             return $this->createFromJson($item);
         }, $this->getFromArray($vkMessage, 'fwd_messages', []));
-        return new VkMessage($fromId, $text, $replyMessage, $forwardedMessages);
+        return new VkMessage($fromId, $text, $replyMessage, $forwardedMessages, $photos);
     }
 
     /**
@@ -73,5 +75,37 @@ class VkMessageCreator implements MessageCreator
     public function create(array $messagePayload): Message
     {
         return $this->createFromJson($messagePayload);
+    }
+
+    /**
+     * Creates photos array
+     *
+     * @param array $vkMessage
+     * @return array
+     */
+    public function getPhotos(array $vkMessage): array
+    {
+        $attachments = $this->getFromArray($vkMessage, 'attachments', null);
+        if ($attachments === null) {
+            return [];
+        }
+
+        $photos = array_filter($attachments, function($item) {
+            $type = $this->getFromArray($item, 'type', null);
+            return $type === 'photo';
+        });
+
+        return array_map(function($item) {
+            $photo = $this->getFromArrayOrFail($item, 'photo');
+            $sizes = array_filter($this->getFromArrayOrFail($photo, 'sizes'), function ($item) {
+                $type = $this->getFromArrayOrFail($item, 'type');
+                return $type === 'x';
+            });
+            if (empty($sizes)) {
+                throw new InvalidArgumentException('Photo sizes must contain element with x type.');
+            }
+            $size = array_shift($sizes);
+            return new Photo($photo['id'], $size['url'], $size['width'], $size['height']);
+        }, $photos);
     }
 }

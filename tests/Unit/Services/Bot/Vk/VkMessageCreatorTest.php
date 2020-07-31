@@ -13,6 +13,47 @@ class VkMessageCreatorTest extends TestCase
 {
     use WithFaker;
 
+    public function testResolveMessageWithPhoto(): void
+    {
+        $resolver = new VkMessageCreator();
+
+        $messagePayload = $this->generateSimpleMessagePayload();
+        $messagePayload['attachments'] = [
+            [
+                'type' => 'photo',
+                'photo' => [
+                    'id' => $id = $this->faker->randomNumber(),
+                    'sizes' => [
+                        [
+                            'height' => $height = $this->faker->randomNumber(),
+                            'url' => $url = $this->faker->url,
+                            'type' => 'x',
+                            'width' => $width = $this->faker->randomNumber()
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $resolvedMessage = $resolver->createFromJson($messagePayload);
+
+        $this->assertMessage($resolvedMessage, $messagePayload);
+        self::assertEmpty($resolvedMessage->getForwardedMessages());
+        self::assertFalse($resolvedMessage->hasForwardedMessages());
+        self::assertNull($resolvedMessage->getReplyTo());
+        self::assertFalse($resolvedMessage->hasReplyTo());
+        self::assertTrue($resolvedMessage->hasPhotos());
+
+        $photos = $resolvedMessage->getPhotos();
+        self::assertSame(count($photos) , 1);
+
+        $photo = $photos[0];
+        self::assertSame($photo->getId(), $id);
+        self::assertSame($photo->getHeight(), $height);
+        self::assertSame($photo->getUrl(), $url);
+        self::assertSame($photo->getWidth(), $width);
+    }
+
     public function testResolveSimpleMessage(): void
     {
         $resolver = new VkMessageCreator();

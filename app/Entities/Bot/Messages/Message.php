@@ -4,6 +4,8 @@
 namespace App\Entities\Bot\Messages;
 
 
+use App\Entities\Bot\Photo;
+
 abstract class Message
 {
     /**
@@ -26,12 +28,22 @@ abstract class Message
      */
     private $forwardedMessages;
 
-    public function __construct(int $authorId, string $text, Message $replyTo = null, array $forwardedMessages = [])
+    /**
+     * @var Photo[]
+     */
+    private $photos;
+
+    public function __construct(int $authorId,
+                                string $text,
+                                Message $replyTo = null,
+                                array $forwardedMessages = [],
+                                array $photos = [])
     {
         $this->authorId = $authorId;
         $this->text = $text;
         $this->replyTo = $replyTo;
         $this->forwardedMessages = $forwardedMessages;
+        $this->photos = $photos;
     }
 
     /**
@@ -67,6 +79,14 @@ abstract class Message
     }
 
     /**
+     * @return Photo[]
+     */
+    public function getPhotos(): array
+    {
+        return $this->photos;
+    }
+
+    /**
      * @param Message $message
      */
     public function addForwardedMessage(Message $message): void
@@ -74,14 +94,28 @@ abstract class Message
         $this->forwardedMessages[] = $message;
     }
 
+    /**
+     * @return bool
+     */
     public function hasForwardedMessages(): bool
     {
         return !empty($this->forwardedMessages);
     }
 
+    /**
+     * @return bool
+     */
     public function hasReplyTo(): bool
     {
         return $this->replyTo !== null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasPhotos(): bool
+    {
+        return !empty($this->photos);
     }
 
     /**
