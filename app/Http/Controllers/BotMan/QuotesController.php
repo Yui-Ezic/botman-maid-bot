@@ -65,7 +65,7 @@ class QuotesController extends Controller
             }
 
             if (!$messageForQuote->getText()) {
-                $bot->reply($this->messageService->getMessage('empty_message_not_allowed'));
+                $bot->reply($this->messageService->getMessage('quotes.empty_message_not_allowed'));
                 return;
             }
 
