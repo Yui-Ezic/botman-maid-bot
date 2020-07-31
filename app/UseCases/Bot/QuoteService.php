@@ -67,7 +67,8 @@ class QuoteService
         $author = $this->usersService->getUserWithPhoto100px($authorId);
 
         // Convert Html to Image
-        $content = $this->quotesMaker->make($message->getText(), $author, 'quotes.vk');
+        $photo = $message->hasPhotos() ? $message->getPhotos()[0]->getUrl() : null;
+        $content = $this->quotesMaker->make($message->getText(), $author, 'quotes.vk', $photo);
 
         // Remove edges and save
         $name = uniqid("vk/$authorId/quote-", true) . '.png';

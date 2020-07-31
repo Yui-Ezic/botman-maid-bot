@@ -2,6 +2,7 @@
 /** @var $text string text of quotes */
 /** @var $author string full name of author */
 /** @var $avatar string url of avatar image */
+/** @var $photo_url string|null url to photo if exist */
 ?>
 
 <html>
@@ -30,6 +31,10 @@
             max-width: 500px;
             display: table;
             word-break: break-word;
+        }
+
+        .message img {
+            max-width: 100%;
         }
 
         .message-text {
@@ -68,6 +73,9 @@
     <div class="message">
         <span class="message-author">{{ $author }}</span>
         <p class="message-text">{!! nl2br(e($text)) !!}</p>
+        @if ($photo !== null)
+            <img src="{{$photo}}" alt=""/>
+        @endif
     </div>
 </div>
 <script>
