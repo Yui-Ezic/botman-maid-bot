@@ -47,7 +47,7 @@ class BanBuilderTest extends TestCase
     {
         $found = $this->getProfanityFilter()->badWords($text);
         self::assertNotEmpty($found);
-        self::assertSame(mb_strtolower($text), $found[0]);
+        self::assertStringContainsStringIgnoringCase($found[0], $text);
     }
 
     /**
