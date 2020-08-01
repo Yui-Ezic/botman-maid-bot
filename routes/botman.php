@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BotMan\ChatController;
 use App\Http\Controllers\BotMan\QuotesController;
 use App\Http\Controllers\BotManController;
 use App\Http\Middleware\Botman\ProfanityFilter;
@@ -20,3 +21,5 @@ $botman->on("confirmation", static function () {
 });
 
 $botman->hears('/q', QuotesController::class . '@createQuote');
+
+$botman->hears('/kick {user}', ChatController::class . '@removeUser');

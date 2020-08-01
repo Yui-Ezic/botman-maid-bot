@@ -161,6 +161,7 @@ return [
         App\Providers\BotMan\DriverServiceProvider::class,
         App\Providers\WkHtmlToImageServiceProvider::class,
         App\Providers\ProfanityFilterServiceProvider::class,
+        App\Providers\VkServiceProvider::class
     ],
 
     /*

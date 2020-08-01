@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Services\Bot\ChatService;
 use App\Services\Bot\MessageCreator;
 use App\Services\Bot\UsersService;
+use App\Services\Bot\Vk\VkChatService;
 use App\Services\Bot\Vk\VkMessageCreator;
 use App\Services\Bot\Vk\VkUsersService;
 use App\Services\Images\ImagickTrimmer;
@@ -35,17 +37,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(VkUsersService::class, static function (Application $app) {
-            return new VkUsersService($app->make('botman'));
-        });
-
         $this->app->bind(UsersService::class, static function(Application $app) {
             $botman = $app->make('botman');
             switch ($botman->getDriver()->getName())
             {
                 case 'VkCommunityCallback':
                     return $app->make(VkUsersService::class);
-                    break;
                 default:
                     throw new DomainException('Unsupported driver: ' . $botman->getDriver()->getName());
             }
@@ -57,7 +54,6 @@ class AppServiceProvider extends ServiceProvider
             {
                 case 'VkCommunityCallback':
                     return $app->make(VkMessageCreator::class);
-                    break;
                 default:
                     throw new DomainException('Unsupported driver: ' . $botman->getDriver()->getName());
             }
@@ -83,6 +79,17 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(MessageService::class, static function() {
             return new LaravelMessageService(null);
+        });
+
+        $this->app->bind(ChatService::class, static function (Application $app) {
+            $botman = $app->make('botman');
+            switch ($botman->getDriver()->getName())
+            {
+                case 'VkCommunityCallback':
+                    return $app->make(VkChatService::class);
+                default:
+                    throw new DomainException('Unsupported driver: ' . $botman->getDriver()->getName());
+            }
         });
     }
 }

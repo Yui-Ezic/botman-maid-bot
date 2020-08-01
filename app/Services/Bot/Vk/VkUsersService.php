@@ -28,7 +28,7 @@ class VkUsersService implements UsersService
      * @inheritDoc
      * @throws BadMethodCallException
      */
-    public function getUserWithPhoto100px(int $id): array
+    public function getUserWithPhoto100px($id): array
     {
         $user = $this->getVkUser($id, ['photo_100']);
 
@@ -44,7 +44,7 @@ class VkUsersService implements UsersService
      * @inheritDoc
      * @throws BadMethodCallException
      */
-    public function getUser(int $id): array
+    public function getUser($id): array
     {
         $user = $this->getVkUser($id);
 
@@ -65,7 +65,7 @@ class VkUsersService implements UsersService
      *
      * @throws BadMethodCallException
      */
-    private function getVkUser(int $id, array $fields = []): array
+    private function getVkUser($id, array $fields = []): array
     {
         $request = [
             'user_ids' => $id,
