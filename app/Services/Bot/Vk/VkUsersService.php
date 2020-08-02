@@ -4,29 +4,41 @@
 namespace App\Services\Bot\Vk;
 
 
+use App\Exceptions\Bot\InvalidUserIdException;
 use App\Services\Bot\UsersService;
-use BotMan\BotMan\BotMan;
-use BotMan\BotMan\Exceptions\Core\BadMethodCallException;
+use VK\Client\VKApiClient;
+use VK\Exceptions\Api\VKApiParamUserIdException;
+use VK\Exceptions\VKApiException;
+use VK\Exceptions\VKClientException;
 
 class VkUsersService implements UsersService
 {
     /**
-     * @var BotMan
+     * @var VKApiClient
      */
-    private $botMan;
+    private $apiClient;
+
+    /**
+     * @var string
+     */
+    private $token;
 
     /**
      * VkUsersService constructor.
-     * @param BotMan $botMan
+     * @param VKApiClient $apiClient
+     * @param string $token
      */
-    public function __construct(BotMan $botMan)
+    public function __construct(VKApiClient $apiClient, string $token)
     {
-        $this->botMan = $botMan;
+        $this->apiClient = $apiClient;
+        $this->token = $token;
     }
 
     /**
      * @inheritDoc
-     * @throws BadMethodCallException
+     *
+     * @throws VKClientException
+     * @throws VKApiException
      */
     public function getUserWithPhoto100px($id): array
     {
@@ -42,7 +54,9 @@ class VkUsersService implements UsersService
 
     /**
      * @inheritDoc
-     * @throws BadMethodCallException
+     *
+     * @throws VKClientException
+     * @throws VKApiException
      */
     public function getUser($id): array
     {
@@ -63,18 +77,25 @@ class VkUsersService implements UsersService
      *
      * @return array
      *
-     * @throws BadMethodCallException
+     * @throws VKClientException
+     * @throws VKApiException
+     * @throws InvalidUserIdException
      */
     private function getVkUser($id, array $fields = []): array
     {
-        $request = [
+        $postData = [
             'user_ids' => $id,
         ];
 
         if (!empty($fields)) {
-            $request['fields'] = implode(',', $fields);
+            $postData['fields'] = implode(',', $fields);
         }
 
-        return  $this->botMan->sendRequest('users.get', $request)['response'][0];
+        try {
+            $users = $this->apiClient->users()->get($this->token, $postData);
+        } catch (VKApiParamUserIdException $e) {
+            throw new InvalidUserIdException('Invalid user id', $id, $e);
+        }
+        return array_shift($users);
     }
 }

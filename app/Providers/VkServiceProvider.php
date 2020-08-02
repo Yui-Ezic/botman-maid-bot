@@ -8,6 +8,7 @@ use App\Services\Bot\Vk\VkChatService;
 use App\Services\Bot\Vk\VkUsersService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
+use VK\Client\VKApiClient;
 
 class VkServiceProvider extends ServiceProvider
 {
@@ -19,7 +20,7 @@ class VkServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(VkUsersService::class, static function (Application $app) {
-            return new VkUsersService($app->make('botman'));
+            return new VkUsersService($app->make(VKApiClient::class), config('botman.vk.token'));
         });
 
         $this->app->singleton(VkChatService::class, static function (Application $app) {
