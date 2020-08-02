@@ -24,7 +24,7 @@ class VkServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(VkChatService::class, static function (Application $app) {
-            return new VkChatService($app->make('botman'));
+            return new VkChatService($app->make(VKApiClient::class), config('botman.vk.token'));
         });
     }
 }
