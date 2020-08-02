@@ -4,6 +4,9 @@
 namespace App\Http\Controllers\BotMan;
 
 
+use App\Exceptions\Bot\Chat\PermissionDeniedToRemoveUser;
+use App\Exceptions\Bot\Chat\UserHasAlreadyBeenRemoved;
+use App\Exceptions\Bot\InvalidUserIdException;
 use App\Services\Bot\ChatService;
 use App\Services\Bot\UsersService;
 use App\Services\Messages\LaravelMessageService;
@@ -49,6 +52,12 @@ class ChatController
             $bot->reply($this->messageService->getMessage('chat/kick.success'));
         } catch (DomainException $e) {
             $bot->reply($e->getMessage());
+        } catch (PermissionDeniedToRemoveUser $e) {
+            $bot->reply($this->messageService->getMessage('chat/kick.permission_denied'));
+        } catch (UserHasAlreadyBeenRemoved $e) {
+            $bot->reply($this->messageService->getMessage('chat/kick.user_already_removed'));
+        } catch (InvalidUserIdException $e) {
+            $bot->reply($this->messageService->getMessage('chat/kick.invalid_user_id'));
         } catch (Throwable $e) {
             $bot->reply($this->messageService->getMessage('chat/kick.error'));
             throw $e;

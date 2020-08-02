@@ -4,6 +4,9 @@
 namespace App\UseCases\Bot;
 
 
+use App\Exceptions\Bot\Chat\PermissionDeniedToRemoveUser;
+use App\Exceptions\Bot\Chat\UserHasAlreadyBeenRemoved;
+use App\Exceptions\Bot\InvalidUserIdException;
 use App\Services\Bot\ChatService;
 use App\Services\Bot\UsersService;
 
@@ -36,6 +39,10 @@ class RemoveUserService
      *
      * @param string $chatId
      * @param string $userName
+     *
+     * @throws PermissionDeniedToRemoveUser
+     * @throws UserHasAlreadyBeenRemoved
+     * @throws InvalidUserIdException
      */
     public function remove(string $chatId, string $userName): void
     {
