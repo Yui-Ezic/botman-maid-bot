@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Exceptions\Bot\UnsupportedDriverException;
 use App\Services\Bot\ChatService;
 use App\Services\Bot\MessageCreator;
 use App\Services\Bot\UsersService;
@@ -44,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
                 case 'VkCommunityCallback':
                     return $app->make(VkUsersService::class);
                 default:
-                    throw new DomainException('Unsupported driver: ' . $botman->getDriver()->getName());
+                    throw new UnsupportedDriverException('Unsupported driver.', $botman->getDriver());
             }
         });
 
@@ -55,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
                 case 'VkCommunityCallback':
                     return $app->make(VkMessageCreator::class);
                 default:
-                    throw new DomainException('Unsupported driver: ' . $botman->getDriver()->getName());
+                    throw new UnsupportedDriverException('Unsupported driver.', $botman->getDriver());
             }
         });
 
@@ -67,7 +68,7 @@ class AppServiceProvider extends ServiceProvider
                         $userService = $app->make(VkUsersService::class);
                         break;
                     default:
-                        throw new DomainException('Unsupported driver: ' . $botman->getDriver()->getName());
+                        throw new UnsupportedDriverException('Unsupported driver.', $botman->getDriver());
                 }
                 return new QuoteService(
                     $userService,
@@ -88,7 +89,7 @@ class AppServiceProvider extends ServiceProvider
                 case 'VkCommunityCallback':
                     return $app->make(VkChatService::class);
                 default:
-                    throw new DomainException('Unsupported driver: ' . $botman->getDriver()->getName());
+                    throw new UnsupportedDriverException('Unsupported driver.', $botman->getDriver());
             }
         });
     }

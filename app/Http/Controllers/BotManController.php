@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\Bot\UnsupportedDriverException;
 use BotMan\BotMan\BotMan;
-use Illuminate\Http\Request;
 use App\Conversations\ExampleConversation;
 
 class BotManController extends Controller
@@ -13,9 +13,11 @@ class BotManController extends Controller
      */
     public function handle()
     {
-        $botman = app('botman');
-
-        $botman->listen();
+        try {
+            $botman = app('botman');
+            $botman->listen();
+        } catch (UnsupportedDriverException $e) {
+        }
     }
 
     /**
