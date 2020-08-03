@@ -104,8 +104,6 @@ class VkChatService implements ChatService
             'peer_id' => $chatId
         ])['items'];
 
-        info(var_export($members, true));
-
         return array_filter($members, static function($member) {
             return array_key_exists('is_admin', $member) && $member['is_admin'];
         });
