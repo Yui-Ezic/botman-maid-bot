@@ -27,6 +27,6 @@ class OnlyChat implements Matching
      */
     public function matching(IncomingMessage $message, $pattern, $regexMatched)
     {
-        return $this->chatService->isChat($message);
+        return $regexMatched && $this->chatService->isChat($message);
     }
 }

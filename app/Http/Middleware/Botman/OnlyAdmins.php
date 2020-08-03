@@ -33,6 +33,6 @@ class OnlyAdmins implements Matching
         } catch (\Throwable $exception) {
             $sender = $message->getSender();
         }
-        return $this->chatService->isUserAdmin($message->getRecipient(), $sender);
+        return $regexMatched && $this->chatService->isUserAdmin($message->getRecipient(), $sender);
     }
 }
