@@ -7,6 +7,7 @@ namespace App\Services\Bot\Vk;
 use App\Exceptions\Bot\Chat\PermissionDeniedToRemoveUser;
 use App\Exceptions\Bot\Chat\UserHasAlreadyBeenRemoved;
 use App\Services\Bot\ChatService;
+use BotMan\BotMan\Messages\Incoming\IncomingMessage;
 use VK\Client\VKApiClient;
 use VK\Exceptions\VKApiException;
 use VK\Exceptions\VKClientException;
@@ -64,5 +65,13 @@ class VkChatService implements ChatService
             }
             throw $e;
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isChat(IncomingMessage $message): bool
+    {
+        return $message->getRecipient() > 2000000000;
     }
 }
