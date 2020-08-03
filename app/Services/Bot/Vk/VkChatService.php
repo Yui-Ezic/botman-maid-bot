@@ -74,4 +74,40 @@ class VkChatService implements ChatService
     {
         return $message->getRecipient() > 2000000000;
     }
+
+    /**
+     * @inheritDoc
+     *
+     * @throws VKApiException
+     * @throws VKClientException
+     */
+    public function isUserAdmin(int $chatId, int $userId): bool
+    {
+        $admins = $this->getAdministrators($chatId);
+
+        return in_array($userId, array_map(static function ($admin) {
+            return $admin['member_id'];
+        }, $admins), true);
+    }
+
+    /**
+     * @param int $chatId
+     *
+     * @return array
+     *
+     * @throws VKApiException
+     * @throws VKClientException
+     */
+    private function getAdministrators(int $chatId): array
+    {
+        $members = $this->apiClient->messages()->getConversationMembers($this->token, [
+            'peer_id' => $chatId
+        ])['items'];
+
+        info(var_export($members, true));
+
+        return array_filter($members, static function($member) {
+            return array_key_exists('is_admin', $member) && $member['is_admin'];
+        });
+    }
 }

@@ -31,4 +31,14 @@ interface ChatService
      * @return mixed
      */
     public function isChat(IncomingMessage $message): bool;
+
+    /**
+     * Checks if the user is an administrator
+     *
+     * @param int $chatId
+     * @param int $userId
+     *
+     * @return bool
+     */
+    public function isUserAdmin(int $chatId, int $userId): bool;
 }
