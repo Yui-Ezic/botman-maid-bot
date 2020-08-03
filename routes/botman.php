@@ -3,6 +3,7 @@
 use App\Http\Controllers\BotMan\ChatController;
 use App\Http\Controllers\BotMan\QuotesController;
 use App\Http\Controllers\BotManController;
+use App\Http\Middleware\Botman\OnlyAdmins;
 use App\Http\Middleware\Botman\OnlyChat;
 use App\Http\Middleware\Botman\ProfanityFilter;
 use BotMan\BotMan\BotMan;
@@ -23,6 +24,7 @@ $botman->on("confirmation", static function () {
 
 $botman->hears('/q', QuotesController::class . '@createQuote');
 
-$botman->group(['middleware' => app(OnlyChat::class)], static function(BotMan $botman) {
+$botman->group(['middleware' => [app(OnlyChat::class), app(OnlyAdmins::class)]], static function(BotMan $botman) {
     $botman->hears('/kick {user}', ChatController::class . '@removeUser');
 });
+
