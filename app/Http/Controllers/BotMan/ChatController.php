@@ -24,13 +24,27 @@ class ChatController
     private $messageService;
 
     /**
+     * @var ChatService
+     */
+    private $chatService;
+
+    /**
+     * @var UsersService
+     */
+    private $usersService;
+
+    /**
      * QuotesController constructor.
      *
      * @param MessageService $messageService
+     * @param ChatService $chatService
+     * @param UsersService $usersService
      */
-    public function __construct(MessageService $messageService)
+    public function __construct(MessageService $messageService, ChatService $chatService, UsersService $usersService)
     {
         $this->messageService = $messageService;
+        $this->chatService = $chatService;
+        $this->usersService = $usersService;
     }
 
     /**
@@ -41,13 +55,8 @@ class ChatController
     public function removeUser(BotMan $bot, $user): void
     {
         try {
-            /**
-             * Resolve dependencies
-             */
-            $chatService = app(ChatService::class);
-            $usersService = app(UsersService::class);
-
-            (new RemoveUserService($chatService, $usersService))->remove($bot->getMessage()->getRecipient(), $user);
+            (new RemoveUserService($this->chatService, $this->usersService))
+                ->remove($bot->getMessage()->getRecipient(), $user);
 
             $bot->reply($this->messageService->getMessage('chat/kick.success'));
         } catch (DomainException $e) {

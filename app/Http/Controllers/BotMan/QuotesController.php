@@ -27,13 +27,37 @@ class QuotesController extends Controller
     private $messageService;
 
     /**
+     * @var UsersService
+     */
+    private $usersService;
+
+    /**
+     * @var QuoteService
+     */
+    private $quoteService;
+
+    /**
+     * @var MessageCreator
+     */
+    private $messageCreator;
+
+    /**
      * QuotesController constructor.
      *
      * @param MessageService $messageService
+     * @param UsersService $usersService
+     * @param QuoteService $quoteService
+     * @param MessageCreator $messageCreator
      */
-    public function __construct(MessageService $messageService)
+    public function __construct(MessageService $messageService,
+                                UsersService $usersService,
+                                QuoteService $quoteService,
+                                MessageCreator $messageCreator)
     {
         $this->messageService = $messageService;
+        $this->usersService = $usersService;
+        $this->quoteService = $quoteService;
+        $this->messageCreator = $messageCreator;
     }
 
     /**
@@ -46,16 +70,9 @@ class QuotesController extends Controller
     public function createQuote(BotMan $bot): void
     {
         try {
-            /**
-             * Resolve dependencies
-             */
-            $usersService = app(UsersService::class);
-            $quoteService = app(QuoteService::class);
-            $messagesCreator = app(MessageCreator::class);
-
             /** @var ParameterBag $payload */
             $payload = $bot->getMessage()->getPayload();
-            $message = $messagesCreator->createFromJson($payload->get('object')['message']);
+            $message = $this->messageCreator->createFromJson($payload->get('object')['message']);
 
             $messageForQuote = $this->getMessageForQuote($message);
 
@@ -69,9 +86,9 @@ class QuotesController extends Controller
                 return;
             }
 
-            $image = new Image($quoteService->createForVk($messageForQuote));
+            $image = new Image($this->quoteService->createForVk($messageForQuote));
 
-            $user = $usersService->getUser($message->getAuthorId());
+            $user = $this->usersService->getUser($message->getAuthorId());
 
             $message = OutgoingMessage::create($this->messageService->getMessage('quotes.done', [
                 'user_id' => $user['id'],
