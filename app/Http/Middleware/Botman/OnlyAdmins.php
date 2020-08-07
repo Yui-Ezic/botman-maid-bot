@@ -27,12 +27,6 @@ class OnlyAdmins implements Matching
      */
     public function matching(IncomingMessage $message, $pattern, $regexMatched): bool
     {
-        // TODO:: replace sender to $message->getSender when vk driver will be fixed
-        try {
-            $sender = $message->getPayload()->all()['object']['message']['from_id'];
-        } catch (\Throwable $exception) {
-            $sender = $message->getSender();
-        }
-        return $regexMatched && $this->chatService->isUserAdmin($message->getRecipient(), $sender);
+        return $regexMatched && $this->chatService->isUserAdmin($message->getRecipient(), $message->getSender());
     }
 }
