@@ -7,7 +7,9 @@ use App\Http\Controllers\BotManController;
 use App\Http\Middleware\Botman\OnlyAdmins;
 use App\Http\Middleware\Botman\OnlyChat;
 use App\Http\Middleware\Botman\ProfanityFilter;
+use App\Services\Bot\Vk\VkChatService;
 use BotMan\BotMan\BotMan;
+use BotMan\Drivers\VK\VkCommunityCallbackDriver;
 
 /**@var $botman BotMan */
 $botman = resolve('botman');
@@ -19,21 +21,27 @@ $botman->hears('Hi', function (BotMan $bot) {
 });
 $botman->hears('Start conversation', BotManController::class . '@startConversation');
 
-$botman->on("confirmation", static function () {
-    echo config('botman.vk.confirmation_string');
-});
+$botman->group(['driver' => [VkCommunityCallbackDriver::class]], static function (BotMan $botman) {
+    $botman->on("confirmation", static function () {
+        echo config('botman.vk.confirmation_string');
+    });
 
-$botman->hears('/q', QuotesController::class . '@createQuote');
+    $botman->hears('/q', QuotesController::class . '@createQuote');
 
-try {
-    $botman->group(['middleware' => [app(OnlyChat::class), app(OnlyAdmins::class)]], static function(BotMan $botman) {
+    $vkChatService = app(VkChatService::class);
+
+    $botman->group(['middleware' => [
+        new OnlyChat($vkChatService),
+        new OnlyAdmins($vkChatService)
+    ]], static function (BotMan $botman) {
         $botman->hears('/kick {user}', ChatController::class . '@removeUser');
     });
-} catch (UnsupportedDriverException $e) {
-}
+});
 
-$botman->exception(UnsupportedDriverException::class, static function($exception ,BotMan $bot) {
+$botman->exception(UnsupportedDriverException::class, static function ($exception, BotMan $bot) {
     if ($bot->getMessage()->getRecipient()) {
         $bot->say('Эта комманда не поддерживается вашей платформой.', $bot->getMessage()->getRecipient());
     }
+
+    throw $exception;
 });
