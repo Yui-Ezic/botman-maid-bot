@@ -104,8 +104,45 @@ class VkChatService implements ChatService
             'peer_id' => $chatId
         ])['items'];
 
-        return array_filter($members, static function($member) {
+        return array_filter($members, static function ($member) {
             return array_key_exists('is_admin', $member) && $member['is_admin'];
         });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAdminsList(int $chatId): array
+    {
+        $allAdmins = array_map(static function ($member) {
+            return $member['member_id'];
+        }, $this->getAdministrators($chatId));
+
+        return array_filter($allAdmins, static function ($id) {
+            /*
+             * Remove all bots and other incorrect IDs
+             */
+            return $id > 0;
+        });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getChatInfo(int $chatId): array
+    {
+        $chat = $this->getVkChat($chatId);
+
+        return [
+            'id' => $chatId,
+            'title' => $chat['chat_settings']['title']
+        ];
+    }
+
+    private function getVkChat($peer_id)
+    {
+        return array_shift($this->apiClient->messages()->getConversationsById($this->token, [
+            'peer_ids' => $peer_id
+        ])['items']);
     }
 }

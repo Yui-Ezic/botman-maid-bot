@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
+use App\Listeners\ProfanityFound\SendAdminNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use App\Listeners\ProfanityFound\SendUserNotification;
 use App\Events\ProfanityFound;
 
 class EventServiceProvider extends ServiceProvider
@@ -20,7 +20,7 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
         ],
         ProfanityFound::class => [
-            SendUserNotification::class
+            SendAdminNotification::class
         ]
     ];
 

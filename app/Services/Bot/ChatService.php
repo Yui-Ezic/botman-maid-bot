@@ -41,4 +41,23 @@ interface ChatService
      * @return bool
      */
     public function isUserAdmin(int $chatId, int $userId): bool;
+
+    /**
+     * Returns a list of chat admin IDs
+     *
+     * @param int $chatId
+     *
+     * @return mixed
+     */
+    public function getAdminsList(int $chatId): array;
+
+    /**
+     * Returns as array information about chat with fields:
+     * 'id', 'title'
+     *
+     * @param int $chatId
+     *
+     * @return array
+     */
+    public function getChatInfo(int $chatId): array;
 }

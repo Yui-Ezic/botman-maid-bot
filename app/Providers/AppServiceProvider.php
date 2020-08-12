@@ -3,10 +3,10 @@
 namespace App\Providers;
 
 use App\Exceptions\Bot\UnsupportedDriverException;
+use App\Factories\Bot\ChatServiceFactory;
 use App\Services\Bot\ChatService;
 use App\Services\Bot\MessageCreator;
 use App\Services\Bot\UsersService;
-use App\Services\Bot\Vk\VkChatService;
 use App\Services\Bot\Vk\VkMessageCreator;
 use App\Services\Bot\Vk\VkUsersService;
 use App\Services\Images\ImagickTrimmer;
@@ -14,7 +14,6 @@ use App\Services\Messages\LaravelMessageService;
 use App\Services\Messages\MessageService;
 use App\Services\Quotes\QuotesMaker;
 use App\UseCases\Bot\QuoteService;
-use DomainException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
@@ -84,13 +83,8 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(ChatService::class, static function (Application $app) {
             $botman = $app->make('botman');
-            switch ($botman->getDriver()->getName())
-            {
-                case 'VkCommunityCallback':
-                    return $app->make(VkChatService::class);
-                default:
-                    throw new UnsupportedDriverException('Unsupported driver.', $botman->getDriver());
-            }
+            return $app->make(ChatServiceFactory::class)->create($botman->getDriver());
         });
     }
 }
+
