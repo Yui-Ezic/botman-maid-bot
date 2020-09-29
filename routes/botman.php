@@ -2,6 +2,7 @@
 
 use App\Exceptions\Bot\UnsupportedDriverException;
 use App\Http\Controllers\BotMan\ChatController;
+use App\Http\Controllers\BotMan\ProfanityController;
 use App\Http\Controllers\BotMan\QuotesController;
 use App\Http\Controllers\BotManController;
 use App\Http\Middleware\Botman\OnlyAdmins;
@@ -35,6 +36,10 @@ $botman->group(['driver' => [VkCommunityCallbackDriver::class]], static function
         new OnlyAdmins($vkChatService)
     ]], static function (BotMan $botman) {
         $botman->hears('/kick {user}', ChatController::class . '@removeUser');
+
+        $botman->hears('/profanity subscribe', ProfanityController::class . '@subscribe');
+        $botman->hears('/profanity unsubscribe', ProfanityController::class . '@unsubscribe');
+        $botman->hears('/profanity list', ProfanityController::class . '@list');
     });
 });
 

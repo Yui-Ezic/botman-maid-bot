@@ -14,6 +14,8 @@ use App\Services\Messages\LaravelMessageService;
 use App\Services\Messages\MessageService;
 use App\Services\Quotes\QuotesMaker;
 use App\UseCases\Bot\QuoteService;
+use App\UseCases\Profanity\ProfanityService;
+use App\UseCases\Profanity\VkProfanityService;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
@@ -84,6 +86,17 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ChatService::class, static function (Application $app) {
             $botman = $app->make('botman');
             return $app->make(ChatServiceFactory::class)->create($botman->getDriver());
+        });
+
+        $this->app->bind(ProfanityService::class, static function (Application $app) {
+            $botman = $app->make('botman');
+            switch ($botman->getDriver()->getName())
+            {
+                case 'VkCommunityCallback':
+                    return $app->make(VkProfanityService::class);
+                default:
+                    throw new UnsupportedDriverException('Unsupported driver.', $botman->getDriver());
+            }
         });
     }
 }

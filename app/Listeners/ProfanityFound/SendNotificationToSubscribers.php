@@ -2,13 +2,14 @@
 
 namespace App\Listeners\ProfanityFound;
 
+use App\Entities\Profanity\Subscriber;
 use App\Events\ProfanityFound;
 use App\Exceptions\Bot\UnsupportedDriverException;
 use App\Factories\Bot\ChatServiceFactory;
 use App\Services\Messages\MessageService;
 use BotMan\BotMan\Exceptions\Base\BotManException;
 
-class SendAdminNotification
+class SendNotificationToSubscribers
 {
     /**
      * @var ChatServiceFactory
@@ -43,18 +44,19 @@ class SendAdminNotification
             $words = implode(', ', $event->getWords());
             $chatId = $bot->getMessage()->getRecipient();
 
-            $admins = $chatService->getAdminsList($chatId);
+            $subscribers = Subscriber::vk()->get();
             $chat = $chatService->getChatInfo($chatId);
-            foreach ($admins as $admin) {
+            foreach ($subscribers as $subscriber) {
+                /** @var Subscriber $subscriber */
                 try {
                     $bot->say($this->messageService->getMessage('chat/notification.profanity_found_admin_notification', [
                         'text' => $event->getMessage()->getText(),
                         'user_id' => $event->getMessage()->getSender(),
                         'words' => $words,
                         'chat_name' => $chat['title']
-                    ]), $admin);
+                    ]), $subscriber->platform_id);
                 } catch (BotManException $exception) {
-                    info("Message sending to $admin failed with exception " . $exception->getMessage());
+                    info("Message sending to $subscriber->platform_id failed with exception " . $exception->getMessage());
                 }
             }
         }
