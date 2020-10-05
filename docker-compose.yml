@@ -1,0 +1,92 @@
+version: "3.8"
+
+services:
+    bot:
+        build:
+            context: bot/docker
+            dockerfile: development/nginx/Dockerfile
+        volumes:
+            - ./bot:/app
+        ports:
+            - "8080:80"
+        depends_on:
+            - bot-php-fpm
+
+    bot-php-fpm:
+        build:
+            context: bot/docker
+            dockerfile: development/php-fpm/Dockerfile
+        volumes:
+            - ./bot:/app
+        environment:
+            APP_NAME: LocalMaidBot
+            APP_ENV: local
+            APP_KEY: base64:RQb1+ZzZUgJZAMDg55BVmhmGd/E4ZZY8FEI5H+i702I=
+            APP_DEBUG: 1
+            APP_URL: http://localhost:8080
+            LOG_CHANNEL: daily
+            REDIS_HOST: bot-redis
+            REDIS_PASSWORD: null
+            REDIS_PORT: 6379
+            REDIS_DB: 0
+            REDIS_CACHE_DB: 1
+            DB_CONNECTION: pgsql
+            DB_HOST: bot-postgres
+            DB_PORT: 5432
+            DB_DATABASE: app
+            DB_USERNAME: app
+            DB_PASSWORD: secret
+            SENTRY_LARAVEL_DSN: null
+
+
+    bot-php-cli:
+        build:
+            context: bot/docker
+            dockerfile: development/php-cli/Dockerfile
+        volumes:
+            - ./bot:/app
+        environment:
+            APP_NAME: LocalMaidBot
+            APP_ENV: local
+            APP_KEY: base64:RQb1+ZzZUgJZAMDg55BVmhmGd/E4ZZY8FEI5H+i702I=
+            APP_DEBUG: 1
+            APP_URL: http://localhost:8080
+            LOG_CHANNEL: daily
+            REDIS_HOST: bot-redis
+            REDIS_PASSWORD: null
+            REDIS_PORT: 6379
+            REDIS_DB: 0
+            REDIS_CACHE_DB: 1
+            DB_CONNECTION: pgsql
+            DB_HOST: bot-postgres
+            DB_PORT: 5432
+            DB_DATABASE: app
+            DB_USERNAME: app
+            DB_PASSWORD: secret
+            SENTRY_LARAVEL_DSN: null
+
+    bot-node:
+        image: node:14.12-alpine
+        volumes:
+            - ./bot:/app
+        working_dir: /app
+        tty: true
+
+    bot-redis:
+        image: redis:6.0
+        ports:
+            - "63791:6379"
+
+    bot-postgres:
+        image: postgres:13.0-alpine
+        environment:
+            POSTGRES_USER: app
+            POSTGRES_PASSWORD: secret
+            POSTGRES_DB: app
+        volumes:
+            - bot-postgres:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+
+volumes:
+    bot-postgres:
